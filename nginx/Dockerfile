@@ -12,9 +12,11 @@ COPY nginx.conf /etc/nginx/nginx.conf
 COPY ssl/cert.pem /etc/nginx/certs/
 COPY ssl/key.pem  /etc/nginx/private/
 
-COPY html/index.html /var/www/html
+COPY html /home/html
 
-EXPOSE 80
+# COPY html/index.html /var/www/html
+
+EXPOSE 443
 
 CMD ["nginx", "-g", "daemon off;"]
 # CMD ['sh']

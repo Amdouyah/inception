@@ -1,0 +1,35 @@
+FROM    debian:latest
+
+RUN     apt-get update && apt install -y wget
+
+RUN     apt-get install -y php8.2-fpm php8.2-mysql php8.2-curl mariadb-client
+
+#get worpress client    
+# WP-CLI is a command line interface that allows users to manage their WordPress websites from the command prompt
+RUN     wget https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar && \
+        chmod +x wp-cli.phar && \
+        mv wp-cli.phar /usr/local/bin/wp
+
+RUN mkdir -p /var/www/html
+#add an set up wordpress 
+
+RUN     wget https://wordpress.org/latest.tar.gz && \
+        tar -xvzf latest.tar.gz && \
+        #tar an archiveing utulity 
+        #-x Extract the contents of the archive
+        #-v Verbose mode, so it will list the files being extracted
+        #-z Filter the archive through gzip to decompress it.
+        #-f Specifies the file to extract
+        mv wordpress/* /var/www/html && \
+        chown -R www-data:www-data /var/www/html && \
+        #chown change owner
+        #first www-data refers to the user
+        #second www-data refers to the group
+        #Sets both the user and group ownership to www-data
+        # user is typically the user under which the web server(nginx)
+        rm latest.tar.gz
+
+
+# PHP-FPM listens for incoming request from web server "nginx"and manage a pool of worker processes to handel these requests 
+
+EXPOSE 9000
