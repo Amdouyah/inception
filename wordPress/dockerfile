@@ -29,7 +29,10 @@ RUN     wget https://wordpress.org/latest.tar.gz && \
         # user is typically the user under which the web server(nginx)
         rm latest.tar.gz
 
-
+COPY script.sh .
+RUN chmod +x script.sh
 # PHP-FPM listens for incoming request from web server "nginx"and manage a pool of worker processes to handel these requests 
 
 EXPOSE 9000
+
+CMD ["sh", "script.sh"]
