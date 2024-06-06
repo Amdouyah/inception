@@ -1,38 +1,23 @@
-FROM    debian:latest
+#!/bin/bash
 
-RUN     apt-get update && apt install -y wget
 
-RUN     apt-get install -y php8.2-fpm php8.2-mysql php8.2-curl mariadb-client
+wget https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar
+        
+sed -i "s|listen = /run/php/php8.2-fpm.sock|listen = 0.0.0.0:9000|g" /etc/php/8.2/fpm/pool.d/www.conf
 
-#get worpress client    
-# WP-CLI is a command line interface that allows users to manage their WordPress websites from the command prompt
-RUN     wget https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar && \
-        chmod +x wp-cli.phar && \
-        mv wp-cli.phar /usr/local/bin/wp
+chmod +x wp-cli.phar 
 
-RUN mkdir -p /var/www/html
-#add an set up wordpress 
+mv wp-cli.phar /usr/local/bin/wp
 
-RUN     wget https://wordpress.org/latest.tar.gz && \
-        tar -xvzf latest.tar.gz && \
-        #tar an archiveing utulity 
-        #-x Extract the contents of the archive
-        #-v Verbose mode, so it will list the files being extracted
-        #-z Filter the archive through gzip to decompress it.
-        #-f Specifies the file to extract
-        mv wordpress/* /var/www/html && \
-        chown -R www-data:www-data /var/www/html && \
-        #chown change owner
-        #first www-data refers to the user
-        #second www-data refers to the group
-        #Sets both the user and group ownership to www-data
-        # user is typically the user under which the web server(nginx)
-        rm latest.tar.gz
+cd /var/www/html/
 
-COPY script.sh .
-RUN chmod +x script.sh
-# PHP-FPM listens for incoming request from web server "nginx"and manage a pool of worker processes to handel these requests 
+wp core download --allow-root
+#download the ltest version of WordPress , run as the root user
 
-EXPOSE 9000
+wp config create --allow-root --dbname=${DB_NAME} --dbuser=${DB_USER} --dbpass=${DB_PASSWORD} --dbhost=mariadb:3306 --path='/var/www/html/'
 
-CMD ["sh", "script.sh"]
+wp core install --allow-root --url=${WEBSITE} --title=inception --admin_user=${ADMIN} --admin_password=${PASS} --admin_email=${EMAIL}
+
+
+exec php-fpm8.2 -F
+# starts PHP-FPM in the foreground, replacing the current shell process with PHP-FPM. This setup ensures that

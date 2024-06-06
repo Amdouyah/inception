@@ -1,0 +1,52 @@
+# YAML is a data serialization language used for writing configuration files
+# bind mout depence in filesystem on the host machine
+# volume live in specifice arrya that's manage by docker
+version: '3.9'
+
+services:
+  nginx:
+    depends_on:
+      - wordpress 
+    image: nginx:latest
+    container_name : nginx
+    # volumes :
+    #   - nginx:/home/html
+    networks :
+      - inception
+    ports:
+      - 443:443
+  
+  mariadb:
+    build :
+      context : ./mariadb
+      dockerfile : Dockerfile
+    container_name : mariadb
+    # volumes :
+      # - nginx:/home/html
+    env_file: ./.env
+
+    networks :
+      - inception
+    # ports:
+    #   - 443:443
+      
+  wordpress:
+    depends_on:
+      - mariadb 
+    build :
+      context : ./WordPress
+      dockerfile : Dockerfile
+    container_name : wordpress
+    env_file: ./.env
+    # volumes :
+    #   - nginx:/home/html
+    networks :
+      - inception
+    # ports:
+    #   - 443:443
+networks:
+  inception:
+    driver: bridge
+    
+# networks :
+#   inception:
