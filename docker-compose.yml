@@ -4,31 +4,17 @@
 version: '3.9'
 
 services:
-  nginx:
-    depends_on:
-      - wordpress 
-    image: nginx:latest
-    container_name : nginx
-    # volumes :
-    #   - nginx:/home/html
-    networks :
-      - inception
-    ports:
-      - 443:443
   
   mariadb:
     build :
       context : ./mariadb
       dockerfile : Dockerfile
     container_name : mariadb
-    # volumes :
-      # - nginx:/home/html
     env_file: ./.env
-
     networks :
       - inception
-    # ports:
-    #   - 443:443
+    volumes:
+      - mariadbvolumes:/run/mysqld
       
   wordpress:
     depends_on:
@@ -38,15 +24,41 @@ services:
       dockerfile : Dockerfile
     container_name : wordpress
     env_file: ./.env
-    # volumes :
-    #   - nginx:/home/html
     networks :
       - inception
-    # ports:
-    #   - 443:443
+    volumes :
+      - wordvolumes:/var/www/html/wordpress
+  nginx:
+    depends_on:
+      - wordpress 
+    container_name : nginx
+    build:
+      context : ./nginx-docker
+      dockerfile : Dockerfile
+    networks :
+        - inception
+    ports:
+      - "443:443"
+    volumes:
+      - wordvolumes:/var/www/html/wordpress
+
 networks:
   inception:
     driver: bridge
     
-# networks :
-#   inception:
+# volumes:
+#   mariadbvolumes:
+#   wordvolumes:
+volumes : 
+  mariadbvolumes:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: $HOME/data/mariadb
+  wordvolumes:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: $HOME/data/wordpres

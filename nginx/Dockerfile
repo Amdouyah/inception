@@ -2,19 +2,17 @@ FROM debian:latest
 
 RUN apt-get update 
 
-RUN apt-get install -y nginx && \
-    apt-get clean
+RUN apt-get install -y nginx
 
-RUN chmod -R 777 /var/www/html
+RUN mkdir -p /var/www/html/wordpress
 
-COPY nginx.conf /etc/nginx/nginx.conf
+# RUN chmod -R 777 /var/www/html/wordpress
+
+COPY ./tools/nginx.conf /etc/nginx/conf.d/
 
 COPY ssl/cert.pem /etc/nginx/certs/
 COPY ssl/key.pem  /etc/nginx/private/
 
-COPY html /home/html
-
-# COPY html/index.html /var/www/html
 
 EXPOSE 443
 
